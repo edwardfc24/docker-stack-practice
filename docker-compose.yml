@@ -1,0 +1,43 @@
+services:
+  drupal:
+    image: edwardfc/drupal
+    ports:
+      - "80:80"
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - drupal-modules:/var/www/html/modules
+      - drupal-profiles:/var/www/html/profiles       
+      - drupal-sites:/var/www/html/sites      
+      - drupal-themes:/var/www/html/themes
+  postgres:
+    image: postgres:14.3
+    deploy:
+      restart_policy:
+        condition: on-failure
+    environment:
+      - POSTGRES_USER_FILE=/run/secrets/psql-user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/psql-pass
+    secrets:
+      - psql-user
+      - psql-pass
+    volumes:
+      - drupal-data:/var/lib/postgresql/data
+
+
+volumes:
+  drupal-data:
+  drupal-modules:
+  drupal-profiles:
+  drupal-sites:
+  drupal-themes:
+
+secrets:
+  psql-user:
+    external: true
+  psql-pass:
+    external: true
